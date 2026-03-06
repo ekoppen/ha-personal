@@ -1,0 +1,179 @@
+blueprint:
+  name: "Hue Dimmer ZHA - Twee Apparaten"
+  description: |
+    Philips Hue dimmer switch (RWL020/RWL021/RWL022) via ZHA.
+
+    Aan/Uit knoppen (boven/onder) bedienen apparaat 1:
+    - Kort indrukken AAN: inschakelen
+    - Lang indrukken AAN: dimmen omhoog
+    - Kort indrukken UIT: uitschakelen
+    - Lang indrukken UIT: dimmen omlaag
+
+    Plus/Min knoppen (midden) bedienen apparaat 2:
+    - Kort indrukken +: helderheid stap omhoog
+    - Lang indrukken +: continu dimmen omhoog
+    - Kort indrukken -: helderheid stap omlaag
+    - Lang indrukken -: continu dimmen omlaag
+
+    Tip: Controleer in Ontwikkelaarstools > Gebeurtenissen (zha_event)
+    welke commando's jouw dimmer stuurt als het niet werkt.
+  domain: automation
+  input:
+    remote:
+      name: Hue Dimmer Switch
+      description: Selecteer je Philips Hue dimmer (ZHA)
+      selector:
+        device:
+          integration: zha
+          manufacturer: Philips
+    light_1:
+      name: "Apparaat 1 (Aan/Uit knoppen)"
+      description: "Wordt bediend met de bovenste (aan) en onderste (uit) knop"
+      selector:
+        target:
+          entity:
+            domain: light
+    light_2:
+      name: "Apparaat 2 (+/- knoppen)"
+      description: "Wordt bediend met de plus en min knoppen"
+      selector:
+        target:
+          entity:
+            domain: light
+    brightness_step:
+      name: Helderheidstap (%)
+      description: "Hoeveel de helderheid verandert per korte klik"
+      default: 20
+      selector:
+        number:
+          min: 5
+          max: 50
+          step: 5
+          unit_of_measurement: "%"
+          mode: slider
+    hold_step:
+      name: Dim stap bij vasthouden (%)
+      description: "Helderheidsverandering per stap bij lang indrukken"
+      default: 10
+      selector:
+        number:
+          min: 5
+          max: 25
+          step: 5
+          unit_of_measurement: "%"
+          mode: slider
+    hold_delay:
+      name: Dim snelheid (ms)
+      description: "Tijd tussen dim-stappen bij lang indrukken (lager = sneller)"
+      default: 300
+      selector:
+        number:
+          min: 100
+          max: 1000
+          step: 50
+          unit_of_measurement: "ms"
+          mode: slider
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: !input remote
+
+action:
+  - variables:
+      command: "{{ trigger.event.data.command }}"
+      brightness_step: !input brightness_step
+      hold_step: !input hold_step
+      hold_delay: !input hold_delay
+  - choose:
+      # ========================================
+      # APPARAAT 1: AAN/UIT KNOPPEN
+      # ========================================
+
+      # Aan - kort indrukken → inschakelen
+      - conditions: "{{ command == 'on_short_release' }}"
+        sequence:
+          - service: light.turn_on
+            target: !input light_1
+
+      # Aan - lang indrukken → dimmen omhoog (herhaalt tot loslaten)
+      - conditions: "{{ command == 'on_hold' }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target: !input light_1
+                  data:
+                    brightness_step_pct: "{{ hold_step }}"
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # Uit - kort indrukken → uitschakelen
+      - conditions: "{{ command == 'off_short_release' }}"
+        sequence:
+          - service: light.turn_off
+            target: !input light_1
+
+      # Uit - lang indrukken → dimmen omlaag (herhaalt tot loslaten)
+      - conditions: "{{ command == 'off_hold' }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target: !input light_1
+                  data:
+                    brightness_step_pct: "{{ -1 * (hold_step | int) }}"
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # ========================================
+      # APPARAAT 2: PLUS/MIN KNOPPEN
+      # ========================================
+
+      # Plus - kort indrukken → helderheid stap omhoog
+      - conditions: "{{ command == 'up_short_release' }}"
+        sequence:
+          - service: light.turn_on
+            target: !input light_2
+            data:
+              brightness_step_pct: "{{ brightness_step }}"
+
+      # Plus - lang indrukken → continu dimmen omhoog
+      - conditions: "{{ command == 'up_hold' }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target: !input light_2
+                  data:
+                    brightness_step_pct: "{{ hold_step }}"
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # Min - kort indrukken → helderheid stap omlaag
+      - conditions: "{{ command == 'down_short_release' }}"
+        sequence:
+          - service: light.turn_on
+            target: !input light_2
+            data:
+              brightness_step_pct: "{{ -1 * (brightness_step | int) }}"
+
+      # Min - lang indrukken → continu dimmen omlaag
+      - conditions: "{{ command == 'down_hold' }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target: !input light_2
+                  data:
+                    brightness_step_pct: "{{ -1 * (hold_step | int) }}"
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
