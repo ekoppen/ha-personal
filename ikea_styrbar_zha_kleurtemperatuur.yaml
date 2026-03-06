@@ -1,0 +1,210 @@
+blueprint:
+  name: "IKEA STYRBAR ZHA - Kleurtemperatuur"
+  description: |
+    IKEA STYRBAR remote (E2001/E2002) via ZHA.
+
+    Boven/Onder knoppen: aan/uit schakelen en dimmen
+    Links/Rechts knoppen: kleurtemperatuur aanpassen
+
+    Links = koeler (meer blauw/wit)
+    Rechts = warmer (meer geel/oranje)
+
+    Kort indrukken: enkele stap
+    Lang indrukken: continu aanpassen tot loslaten
+
+    Tip: Controleer in Ontwikkelaarstools > Gebeurtenissen (zha_event)
+    welke commando's jouw STYRBAR stuurt als het niet werkt.
+  domain: automation
+  input:
+    remote:
+      name: STYRBAR Remote
+      description: Selecteer je IKEA STYRBAR remote (ZHA)
+      selector:
+        device:
+          integration: zha
+          manufacturer: IKEA of Sweden
+    light:
+      name: Lamp
+      description: "De lamp die bediend wordt (moet kleurtemperatuur ondersteunen voor links/rechts)"
+      selector:
+        entity:
+          domain: light
+    temp_step:
+      name: Kleurtemperatuur stap (K)
+      description: "Hoeveel de kleurtemperatuur verandert per korte klik"
+      default: 500
+      selector:
+        number:
+          min: 100
+          max: 1000
+          step: 50
+          unit_of_measurement: "K"
+          mode: slider
+    hold_temp_step:
+      name: Kleurtemperatuur stap bij vasthouden (K)
+      description: "Verandering per stap bij lang indrukken"
+      default: 250
+      selector:
+        number:
+          min: 50
+          max: 500
+          step: 50
+          unit_of_measurement: "K"
+          mode: slider
+    brightness_step:
+      name: Helderheidstap (%)
+      description: "Hoeveel de helderheid verandert per korte klik (boven/onder)"
+      default: 20
+      selector:
+        number:
+          min: 5
+          max: 50
+          step: 5
+          unit_of_measurement: "%"
+          mode: slider
+    hold_delay:
+      name: Herhalingssnelheid (ms)
+      description: "Tijd tussen stappen bij lang indrukken (lager = sneller)"
+      default: 300
+      selector:
+        number:
+          min: 100
+          max: 1000
+          step: 50
+          unit_of_measurement: "ms"
+          mode: slider
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: !input remote
+
+action:
+  - variables:
+      command: "{{ trigger.event.data.command }}"
+      args: "{{ trigger.event.data.args | default([]) }}"
+      light_entity: !input light
+      temp_step: !input temp_step
+      hold_temp_step: !input hold_temp_step
+      brightness_step: !input brightness_step
+      hold_delay: !input hold_delay
+  - choose:
+      # ========================================
+      # AAN/UIT EN DIMMEN (boven/onder knoppen)
+      # ========================================
+
+      # Boven - kort indrukken → inschakelen
+      - conditions: "{{ command == 'on' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ light_entity }}"
+
+      # Boven - lang indrukken → dimmen omhoog
+      - conditions: "{{ command == 'move_with_on_off' }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: "{{ light_entity }}"
+                  data:
+                    brightness_step_pct: 10
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # Onder - kort indrukken → uitschakelen
+      - conditions: "{{ command == 'off' }}"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: "{{ light_entity }}"
+
+      # Onder - lang indrukken → dimmen omlaag
+      - conditions: "{{ command == 'move' }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: "{{ light_entity }}"
+                  data:
+                    brightness_step_pct: -10
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # ========================================
+      # KLEURTEMPERATUUR (links/rechts knoppen)
+      # ========================================
+
+      # Links - kort indrukken → koeler (hogere Kelvin)
+      - conditions: "{{ command == 'press' and args == [257, 13, 0] }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ light_entity }}"
+            data:
+              color_temp_kelvin: >-
+                {{ min(
+                  state_attr(light_entity, 'max_color_temp_kelvin') | int(6500),
+                  (state_attr(light_entity, 'color_temp_kelvin') | int(4000)) + temp_step
+                ) }}
+
+      # Rechts - kort indrukken → warmer (lagere Kelvin)
+      - conditions: "{{ command == 'press' and args == [256, 13, 0] }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ light_entity }}"
+            data:
+              color_temp_kelvin: >-
+                {{ max(
+                  state_attr(light_entity, 'min_color_temp_kelvin') | int(2000),
+                  (state_attr(light_entity, 'color_temp_kelvin') | int(4000)) - temp_step
+                ) }}
+
+      # Links - lang indrukken → continu koeler
+      - conditions: "{{ command == 'hold' and args == [3329, 0] }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: "{{ light_entity }}"
+                  data:
+                    color_temp_kelvin: >-
+                      {{ min(
+                        state_attr(light_entity, 'max_color_temp_kelvin') | int(6500),
+                        (state_attr(light_entity, 'color_temp_kelvin') | int(4000)) + hold_temp_step
+                      ) }}
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # Rechts - lang indrukken → continu warmer
+      - conditions: "{{ command == 'hold' and args == [3328, 0] }}"
+        sequence:
+          - repeat:
+              while: "{{ true }}"
+              sequence:
+                - service: light.turn_on
+                  target:
+                    entity_id: "{{ light_entity }}"
+                  data:
+                    color_temp_kelvin: >-
+                      {{ max(
+                        state_attr(light_entity, 'min_color_temp_kelvin') | int(2000),
+                        (state_attr(light_entity, 'color_temp_kelvin') | int(4000)) - hold_temp_step
+                      ) }}
+                - delay:
+                    milliseconds: "{{ hold_delay }}"
+
+      # Stop/Release → stopt de repeat loop (via mode: restart)
+      - conditions: "{{ command in ['stop_with_on_off', 'stop', 'release'] }}"
+        sequence: []
