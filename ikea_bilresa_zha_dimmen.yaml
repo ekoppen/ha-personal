@@ -1,0 +1,90 @@
+blueprint:
+  name: "IKEA BILRESA ZHA - Dimmen"
+  description: |
+    IKEA BILRESA scroll wheel remote (E2490) via ZHA.
+
+    Knop: aan/uit schakelen
+    Scrollwiel: helderheid direct naar het niveau van het wiel
+
+    Let op: kleurtemperatuur, hue en volume-modus zitten niet in deze versie —
+    die commando's zijn in ZHA (nog) niet betrouwbaar te onderscheiden van de
+    knop-events. Zie de community-blueprint voor een Zigbee2MQTT-variant met
+    die extra's: https://gist.github.com/kenwer/19e8feed30c2619ca4dbd51c8442e4ac
+
+    Tip: Controleer in Ontwikkelaarstools > Gebeurtenissen (zha_event)
+    welke commando's jouw BILRESA stuurt als het niet werkt.
+  domain: automation
+  input:
+    remote:
+      name: BILRESA Remote
+      description: Selecteer je IKEA BILRESA scroll wheel (ZHA)
+      selector:
+        device:
+          integration: zha
+          manufacturer: IKEA of Sweden
+    light:
+      name: Lamp
+      description: De lamp die bediend wordt
+      selector:
+        entity:
+          domain: light
+    min_brightness:
+      name: Minimale helderheid
+      description: "Voorkomt dat het licht uitgaat als je helemaal terugscrolt (1-255)"
+      default: 3
+      selector:
+        number:
+          min: 1
+          max: 50
+          step: 1
+          mode: slider
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: !input remote
+
+action:
+  - variables:
+      command: "{{ trigger.event.data.command }}"
+      args: "{{ trigger.event.data.args | default([]) }}"
+      light_entity: !input light
+      min_brightness: !input min_brightness
+  - choose:
+      # ========================================
+      # AAN/UIT (druk op het wiel)
+      # ========================================
+
+      # Kort indrukken → inschakelen
+      - conditions: "{{ command == 'on' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ light_entity }}"
+
+      # Kort indrukken → uitschakelen
+      - conditions: "{{ command == 'off' }}"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: "{{ light_entity }}"
+
+      # ========================================
+      # DIMMEN (scrollwiel)
+      # ========================================
+
+      # move_to_level: args[0] = niveau 0-255, args[1] = transitietijd
+      # Guard: alleen verwerken als lamp al aan is — anders zet de level-melding
+      # die na een UIT-druk binnenkomt het licht per ongeluk weer aan (race condition)
+      - conditions: "{{ command == 'move_to_level' and args | length > 0 and is_state(light_entity, 'on') }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ light_entity }}"
+            data:
+              brightness: "{{ [min_brightness, [255, args[0] | int] | min] | max }}"
+              transition: "{{ (args[1] | default(0, true)) | int(0) }}"
