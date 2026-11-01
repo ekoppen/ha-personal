@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository contents
+
+- `button-code-lock/` — ESP32 combination lock (described below)
+- `bilresa-wandschakelaar/` — 3D-printable wall switch housing for IKEA BILRESA PCBs (Python/manifold3d CAD in `bron/`, print files in `print/`; see its README)
+- `*.yaml` in the root — Home Assistant ZHA blueprints
+
 ## Project Overview
 
 ESP32 Arduino project: a **combination lock** using a 12-LED NeoPixel ring. A spinning pixel acts as a vault dial — press the button three times to stop at positions. If the combination matches the secret code, an HTTP request is sent to Home Assistant. The combination and HA settings are configurable via a web interface served by the ESP32.
