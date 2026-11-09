@@ -33,6 +33,41 @@ worden ingeklikt. Batterijgevoed (2× AAA per printplaat), geen 230 V nodig.
 | `B1_blindplaat_1doos` | enkel | – (blindplaat) | – | 86 × 103 |
 | `D2_montagebakje_2_losse_modules` | dubbel (71 mm) | bakje voor 2 losse enkele modules naast elkaar (bv. V2 + B1) | – | 173 × 103 |
 
+### Compacte modellen (v11) – zelfde maat als een Jung AS500-afdekraam
+
+![compact en stopcontact](afbeeldingen/v11_compact_en_stopcontact.png)
+
+| Map | Doos | Inhoud | Choc's | Formaat |
+|---|---|---|---|---|
+| `C1_enkel_compact` | enkel | 1 BILRESA, 1 wip | 4 | 80,5 × 80,5 |
+| `C2_enkel_plus_stopcontact_jung` | dubbel (71 mm) | 1 BILRESA + venster voor een Jung-stopcontact (centraalplaat 55 × 55) | 4 | 151,5 × 80,5 |
+
+- Omdat deze modellen lager zijn, zitten de Choc's **naast** de printplaat: 2 boven en 2 onder.
+  Zo drukt de wip links en rechts even zwaar en draait hij niet scheef. Met 4 Choc's voelt de wip iets zwaarder
+  dan bij V1–V5.
+- C2 heeft het stopcontact rechts. Wil je het links hebben, draai dan het hele raam 180°. De BILRESA-knoppen
+  boven/onder wisselen dan om; dat pas je aan in HA.
+
+#### Stopcontact inbouwen (C2)
+
+> ⚠️ **230 V.** Zet eerst de groep in de meterkast uit en controleer dat het stopcontact spanningsloos is.
+> Twijfel je, laat het stopcontact dan door een installateur plaatsen.
+
+1. Haal het afdekraam en de centraalplaat van het stopcontact af. Draai de schroeven van de draagring los.
+2. Leg het montagebakje over **beide** dozen. Aan de stopcontactkant komt het bakje **tussen de muur en de
+   draagring**.
+3. Zet de draagring vast met schroeven die **2 mm langer** zijn dan de oude (door het bakje heen).
+   Aan de BILRESA-kant schroef je het bakje vast zoals bij de andere varianten.
+4. Basis met 4× M3 × 8 op het bakje, wip en vensterplaat inklikken.
+5. Klik de originele centraalplaat van Jung terug. Die steekt door het venster van 56 × 56 mm.
+
+Het geprinte raam raakt geen spanningvoerende delen; het stopcontact zelf blijft dicht. Print het wel in
+**PETG of ASA** (niet PLA) en controleer na montage of de centraalplaat goed vastklikt.
+
+**Onzeker zonder meting:** het ontwerp gaat uit van een Jung AS500-centraalplaat van 55 × 55 mm en een
+draagring van max. 71 × 71 mm. Klopt dat niet bij jouw stopcontact, dan kunnen `JUNG_PLATE` en `BOX_HOLE_D`
+in `bron/cad11.py` worden aangepast.
+
 Per variant:
 
 - `*_deel1_basis.3mf` – basis met frame
@@ -77,6 +112,7 @@ Parametrisch ontwerp in Python met [manifold3d](https://github.com/elalish/manif
 
 - `cad.py` → `cad7.py` → `cad8.py` → `cad9.py` → `cad10.py`: opeenvolgende versies; `cad10.py` is de actuele.
 - `export10.py` schrijft alle varianten naar `out10/`; `check10.py` controleert op botsingen tijdens het kantelen.
+- `cad11.py` / `export11.py` / `check11.py`: de compacte modellen C1 en C2 (naar `out11/`).
 - De klem voor de printplaat wordt 1-op-1 uit een referentie-basis genomen (`ref/base4c.stl`, niet meegeleverd:
   zie *Credits*). `ref/pocket_outline_unit.pkl` is de daaruit afgeleide contour van de printplaat.
 
