@@ -33,6 +33,56 @@ worden ingeklikt. Batterijgevoed (2× AAA per printplaat), geen 230 V nodig.
 | `B1_blindplaat_1doos` | enkel | – (blindplaat) | – | 86 × 103 |
 | `D2_montagebakje_2_losse_modules` | dubbel (71 mm) | bakje voor 2 losse enkele modules naast elkaar (bv. V2 + B1) | – | 173 × 103 |
 
+### Compacte modellen – 80,5 × 80,5 mm per doos
+
+![compact](afbeeldingen/v11_compact_en_stopcontact.png)
+
+| Map | Doos | Inhoud | Choc's | Formaat |
+|---|---|---|---|---|
+| `C1_enkel_compact` | enkel | 1 BILRESA, 1 wip | 4 | 80,5 × 80,5 |
+| `C2_enkel_plus_stopcontact_kopp` | dubbel (71 mm) | 1 BILRESA + venster voor een Kopp-stopcontact | 4 | 151,5 × 80,5 |
+
+- Omdat deze modellen lager zijn, zitten de Choc's **naast** de printplaat: 2 boven en 2 onder.
+  Zo drukt de wip links en rechts even zwaar en draait hij niet scheef. Met 4 Choc's voelt de wip iets zwaarder
+  dan bij V1–V5.
+- C2 heeft het stopcontact rechts. Wil je het links hebben, draai dan het hele raam 180°. De BILRESA-knoppen
+  boven/onder wisselen dan om; dat pas je aan in HA.
+- *(De afbeelding hierboven toont nog de eerste C2-versie; zie hieronder voor de Kopp-versie.)*
+
+#### C2: stopcontact van Kopp
+
+![C2 Kopp](afbeeldingen/v12_stopcontact_kopp.png)
+
+Net als bij een origineel Kopp-raam zit onderin het venster een **dun randje** (opening 48 mm, inkepingen in
+het midden van elke kant). Het stopcontact klemt dat randje vast, waardoor ook de stopcontactkant van het raam
+vastzit. Het venster zelf is 55,8 mm (gemeten 55,5 + speling).
+
+**Eerst de pasproefjes printen** (`deel0_pasproefjes_randje`, ca. 20 min): vier vierkantjes met een randje van
+1,0 / 1,5 / 2,0 / 2,5 mm (1 t/m 4 streepjes). Kijk welk randje het stopcontact stevig, zonder rammelen,
+vastzet. Print daarna de basis met **dezelfde randdikte** (`deel1_basis_randje_X.Xmm`).
+
+**Scheef zittende doos:** alle schroefgaten in het montagebakje zijn sleufjes langs een cirkel. Het raam kan
+daardoor ca. **±3° draaien** en ruim 1 mm opschuiven (voor dozen die niet precies 71 mm uit elkaar zitten).
+
+![doorsnede](afbeeldingen/v12_doorsnede_stopcontact.png)
+
+> ⚠️ **230 V.** Zet eerst de groep in de meterkast uit en controleer dat het stopcontact spanningsloos is.
+> Twijfel je, laat het stopcontact dan door een installateur plaatsen.
+
+1. Haal het stopcontact en het oude raam los.
+2. Leg het montagebakje over **beide** dozen. Aan de stopcontactkant ligt de draagring van het stopcontact
+   **op de verhoging in het bakje**. Gebruik schroeven die **ca. 4 mm langer** zijn dan de oude.
+3. Zet het raam recht en draai de schroeven aan de BILRESA-kant vast.
+4. Basis met 4× M3 × 8 op het bakje; wip en vensterplaat inklikken.
+5. Zet het stopcontact vast zoals bij het originele Kopp-raam: het dunne randje komt tussen draagring en
+   stopcontact.
+
+Het geprinte raam raakt geen spanningvoerende delen; het stopcontact zelf blijft dicht. Print het in
+**PETG of ASA** (niet PLA). Door de wip-hoogte ligt het stopcontact wat dieper in het raam; een haakse
+stekker past mogelijk niet.
+
+Maten aanpassen kan bovenaan `bron/cad12.py` (`KOPP_WIN`, `LIP_IN`, `NOTCHES`, `RING_T`).
+
 Per variant:
 
 - `*_deel1_basis.3mf` – basis met frame
@@ -77,6 +127,8 @@ Parametrisch ontwerp in Python met [manifold3d](https://github.com/elalish/manif
 
 - `cad.py` → `cad7.py` → `cad8.py` → `cad9.py` → `cad10.py`: opeenvolgende versies; `cad10.py` is de actuele.
 - `export10.py` schrijft alle varianten naar `out10/`; `check10.py` controleert op botsingen tijdens het kantelen.
+- `cad11.py` / `export11.py` / `check11.py`: compact model C1 (naar `out11/`).
+- `cad12.py` / `export12.py` / `check12.py`: C2 met Kopp-stopcontact en de pasproefjes (naar `out12/`).
 - De klem voor de printplaat wordt 1-op-1 uit een referentie-basis genomen (`ref/base4c.stl`, niet meegeleverd:
   zie *Credits*). `ref/pocket_outline_unit.pkl` is de daaruit afgeleide contour van de printplaat.
 
