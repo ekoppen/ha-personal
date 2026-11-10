@@ -53,16 +53,19 @@ worden ingeklikt. Batterijgevoed (2× AAA per printplaat), geen 230 V nodig.
 
 ![C2 Kopp](afbeeldingen/v12_stopcontact_kopp.png)
 
-Net als bij een origineel Kopp-raam zit onderin het venster een **dun randje** (opening 48 mm, inkepingen in
-het midden van elke kant). Het stopcontact klemt dat randje vast, waardoor ook de stopcontactkant van het raam
-vastzit. Het venster zelf is 55,8 mm (gemeten 55,5 + speling).
+Het stopcontact valt **gelijk met het frame**. Daarvoor ligt het stopcontact ca. 10 mm verder van de muur
+dan normaal: in het montagebakje zit een **kraag** (werkt als een verhogingsring voor de inbouwdoos) waar de
+draagring op ligt. De kraag steekt door een groot gat in de basis.
 
-**Eerst de pasproefjes printen** (`deel0_pasproefjes_randje`, ca. 20 min): vier vierkantjes met een randje van
-1,0 / 1,5 / 2,0 / 2,5 mm (1 t/m 4 streepjes). Kijk welk randje het stopcontact stevig, zonder rammelen,
-vastzet. Print daarna de basis met **dezelfde randdikte** (`deel1_basis_randje_X.Xmm`).
+Het **dunne klemrandje** (opening 48 mm, inkepingen in het midden van elke kant) zit onderin de
+**vensterplaat**. Het stopcontact klemt de vensterplaat vast; die heeft dus geen scharnierpinnen.
+Venster 55,8 mm (gemeten 55,5 + speling).
 
-**Scheef zittende doos:** alle schroefgaten in het montagebakje zijn sleufjes langs een cirkel. Het raam kan
-daardoor ca. **±3° draaien** en ruim 1 mm opschuiven (voor dozen die niet precies 71 mm uit elkaar zitten).
+- **Vensterplaat RECHTOP printen** (randje op het bed), dus níét omgedraaid zoals de wip. Geen support nodig.
+- **Randdikte:** print eerst de pasproefjes (`deel0`, 1 t/m 4 streepjes = 1,0 / 1,5 / 2,0 / 2,5 mm) en kies dan
+  de vensterplaat met dezelfde dikte (`deel3b_vensterplaat_randje_X.Xmm_RECHTOP`).
+- **Scheef zittende doos:** alle schroefgaten in het montagebakje zijn sleufjes langs een cirkel. Het raam kan
+  daardoor ca. **±3° draaien** en ruim 1 mm opschuiven.
 
 ![doorsnede](afbeeldingen/v12_doorsnede_stopcontact.png)
 
@@ -70,18 +73,18 @@ daardoor ca. **±3° draaien** en ruim 1 mm opschuiven (voor dozen die niet prec
 > Twijfel je, laat het stopcontact dan door een installateur plaatsen.
 
 1. Haal het stopcontact en het oude raam los.
-2. Leg het montagebakje over **beide** dozen. Aan de stopcontactkant ligt de draagring van het stopcontact
-   **op de verhoging in het bakje**. Gebruik schroeven die **ca. 4 mm langer** zijn dan de oude.
-3. Zet het raam recht en draai de schroeven aan de BILRESA-kant vast.
-4. Basis met 4× M3 × 8 op het bakje; wip en vensterplaat inklikken.
-5. Zet het stopcontact vast zoals bij het originele Kopp-raam: het dunne randje komt tussen draagring en
-   stopcontact.
+2. Schroef het montagebakje aan de BILRESA-kant losjes vast en zet de basis erop (4× M3 × 8).
+3. Leg het stopcontact met de draagring **op de kraag** en zet het vast met schroeven die **ca. 10 mm langer**
+   zijn dan de oude (bv. 3,5 × 35 of × 40). **Gebruik schroeven, geen spreidklauwen**: de klauwen komen door de
+   verhoging niet meer in de doos.
+4. Zet alles recht en draai alle schroeven vast. Wip inklikken.
+5. Leg de vensterplaat in het vak en zet het stopcontact vast zoals bij het originele Kopp-raam: het dunne
+   randje van de vensterplaat komt tussen draagring en stopcontact.
 
 Het geprinte raam raakt geen spanningvoerende delen; het stopcontact zelf blijft dicht. Print het in
-**PETG of ASA** (niet PLA). Door de wip-hoogte ligt het stopcontact wat dieper in het raam; een haakse
-stekker past mogelijk niet.
+**PETG of ASA** (niet PLA). De kraag sluit de ruimte rond het binnenwerk van het stopcontact helemaal af.
 
-Maten aanpassen kan bovenaan `bron/cad12.py` (`KOPP_WIN`, `LIP_IN`, `NOTCHES`, `RING_T`).
+Maten aanpassen kan bovenaan `bron/cad12.py` (`KOPP_WIN`, `LIP_IN`, `NOTCHES`) en `bron/cad13.py` (`RAISE`).
 
 Per variant:
 
@@ -128,7 +131,8 @@ Parametrisch ontwerp in Python met [manifold3d](https://github.com/elalish/manif
 - `cad.py` → `cad7.py` → `cad8.py` → `cad9.py` → `cad10.py`: opeenvolgende versies; `cad10.py` is de actuele.
 - `export10.py` schrijft alle varianten naar `out10/`; `check10.py` controleert op botsingen tijdens het kantelen.
 - `cad11.py` / `export11.py` / `check11.py`: compact model C1 (naar `out11/`).
-- `cad12.py` / `export12.py` / `check12.py`: C2 met Kopp-stopcontact en de pasproefjes (naar `out12/`).
+- `cad12.py`: Kopp-maten, klemrandje en pasproefjes.
+- `cad13.py` / `export13.py` / `check13.py`: C2 met Kopp-stopcontact gelijk met het frame (naar `out13/`).
 - De klem voor de printplaat wordt 1-op-1 uit een referentie-basis genomen (`ref/base4c.stl`, niet meegeleverd:
   zie *Credits*). `ref/pocket_outline_unit.pkl` is de daaruit afgeleide contour van de printplaat.
 
